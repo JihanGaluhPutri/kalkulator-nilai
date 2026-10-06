@@ -12,17 +12,27 @@ Mini program Python untuk menghitung nilai akhir mahasiswa dan mengubahnya menja
 
 ## Struktur Repository
 
-| File | Isi |
-|------|-----|
-| `nilai.py` | Program utama (hitung rata-rata tugas, nilai akhir, dan grade) |
+| File / Folder | Isi |
+|---------------|-----|
+| `nilai.py` | Program utama versi final (sudah diperbaiki) |
 | `test_nilai.py` | 7 test case menggunakan `unittest` |
 | `defect-log.md` | Daftar fault yang ditemukan beserta RCA-nya |
+| `versi-awal/` | Versi program sebelum perbaikan (masih mengandung 3 fault) untuk bukti pengujian |
 
 ## Cara Menjalankan
 
-Pastikan Python sudah terpasang, lalu jalankan:
+Pastikan Python sudah terpasang.
+
+Versi final (semua test lulus):
 
 ```
+python -m unittest -v test_nilai
+```
+
+Versi awal (menampilkan fault):
+
+```
+cd versi-awal
 python -m unittest -v test_nilai
 ```
 
@@ -42,9 +52,9 @@ Ditemukan **3 fault**:
 2. Nilai 80 mendapat grade B, seharusnya A (`tentukan_grade`)
 3. Nilai di luar rentang 0 - 100 diterima (`hitung_nilai_akhir`)
 
-| Kondisi | Hasil test |
-|---------|------------|
-| Sebelum perbaikan | FAILED (failures=3, errors=1) |
-| Sesudah perbaikan | OK (7 dari 7 lulus) |
+| Kondisi | Lokasi | Hasil test |
+|---------|--------|------------|
+| Sebelum perbaikan | `versi-awal/` | FAILED (failures=3, errors=1) |
+| Sesudah perbaikan | folder utama | OK (7 dari 7 lulus) |
 
 Detail bukti, Root Cause Analysis, dan perbaikan setiap fault ada di [defect-log.md](defect-log.md).

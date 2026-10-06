@@ -7,17 +7,20 @@ Aturan program:
 
 Cara pengujian: `python -m unittest -v test_nilai` (7 test case, library unittest)
 
+- Versi sebelum perbaikan : folder `versi-awal/`
+- Versi sesudah perbaikan : folder utama (`nilai.py`)
+
 ## Hasil Pengujian
 
-| Test | Skenario | Sebelum perbaikan | Sesudah perbaikan |
-|------|----------|-------------------|-------------------|
-| TC01 | Rata-rata tugas normal | Lulus | Lulus |
-| TC02 | Grade A untuk nilai 90 | Lulus | Lulus |
-| TC03 | Grade A tepat di batas (nilai 80) | FAIL | Lulus |
-| TC04 | Daftar tugas kosong | ERROR | Lulus |
-| TC05 | Nilai negatif | FAIL | Lulus |
-| TC06 | Nilai lebih dari 100 | FAIL | Lulus |
-| TC07 | Nilai akhir normal | Lulus | Lulus |
+| Test | Skenario | Teknik | Sebelum perbaikan | Sesudah perbaikan |
+|------|----------|--------|-------------------|-------------------|
+| TC01 | Rata-rata tugas normal | Equivalence partitioning | Lulus | Lulus |
+| TC02 | Grade A untuk nilai 90 | Equivalence partitioning | Lulus | Lulus |
+| TC03 | Grade A tepat di batas (nilai 80) | Boundary value analysis | FAIL | Lulus |
+| TC04 | Daftar tugas kosong | Input tidak valid | ERROR | Lulus |
+| TC05 | Nilai negatif | Input tidak valid | FAIL | Lulus |
+| TC06 | Nilai lebih dari 100 | Input tidak valid | FAIL | Lulus |
+| TC07 | Nilai akhir normal | Equivalence partitioning | Lulus | Lulus |
 
 - Sebelum perbaikan: Ran 7 tests, FAILED (failures=3, errors=1)
 - Sesudah perbaikan : Ran 7 tests, OK
@@ -32,10 +35,15 @@ Cara pengujian: `python -m unittest -v test_nilai` (7 test case, library unittes
 - Harapan          : pesan error yang jelas (ValueError)
 - Hasil aktual     : ZeroDivisionError: division by zero
 
-### RCA
+### RCA (5 Whys)
+1. Kenapa program crash? Terjadi pembagian dengan nol.
+2. Kenapa dibagi nol? len(daftar_tugas) bernilai 0.
+3. Kenapa list kosong bisa masuk? Tidak ada pengecekan sebelum menghitung.
+4. Kenapa tidak dicek? Kode mengasumsikan pengguna selalu memberi minimal satu nilai tugas.
+
 - Penyebab langsung : len(daftar_tugas) bernilai 0 sehingga terjadi pembagian dengan nol
-- Akar penyebab     : kode mengasumsikan pengguna selalu memberi minimal satu nilai tugas;
-                      kasus input kosong tidak dipikirkan dan tidak diuji
+- Akar penyebab     : asumsi input tidak dituliskan dan tidak diuji (kasus input kosong
+                      tidak dipikirkan)
 - Perbaikan         : cek daftar kosong di awal fungsi, lempar ValueError
                       ("Daftar tugas tidak boleh kosong")
 - Pencegahan        : validasi input di awal fungsi dan test case untuk input kosong
@@ -51,7 +59,11 @@ Cara pengujian: `python -m unittest -v test_nilai` (7 test case, library unittes
 - Harapan          : Grade A (aturan: A jika nilai >= 80)
 - Hasil aktual     : Grade B ('B' != 'A')
 
-### RCA
+### RCA (5 Whys)
+1. Kenapa nilai 80 mendapat B? Kondisi "nilai > 80" bernilai salah untuk 80.
+2. Kenapa memakai ">"? Salah memilih operator, aturan meminta ">=".
+3. Kenapa tidak ketahuan? Pengujian awal hanya memakai nilai aman seperti 90.
+
 - Penyebab langsung : baris "if nilai > 80" di tentukan_grade
 - Akar penyebab     : salah memilih operator pembanding (> bukan >=) dan tidak ada
                       pengujian pada nilai tepat di batas
@@ -71,7 +83,11 @@ Cara pengujian: `python -m unittest -v test_nilai` (7 test case, library unittes
 - Hasil aktual     : (a) diterima, keluar 50.0 (D)
                      (b) diterima, keluar 101.0 (A)
 
-### RCA
+### RCA (5 Whys)
+1. Kenapa nilai tidak valid diproses? Tidak ada kode yang mengecek rentangnya.
+2. Kenapa tidak ada pengecekan? Validasi tidak menjadi tanggung jawab fungsi mana pun.
+3. Kenapa itu terjadi? Aturan "0 - 100" hanya tertulis di dokumen, tidak diterapkan ke kode.
+
 - Penyebab langsung : tidak ada kode yang memeriksa rentang nilai sebelum perhitungan
 - Akar penyebab     : persyaratan "nilai 0 - 100" hanya tertulis di dokumen, tidak
                       diterapkan ke dalam kode, dan tidak ada bagian yang bertanggung jawab
@@ -86,10 +102,10 @@ Cara pengujian: `python -m unittest -v test_nilai` (7 test case, library unittes
 
 ## Ringkasan
 
-| Fault | Jenis akar penyebab |
-|-------|---------------------|
-| 1 | Asumsi input tidak dituliskan, kasus kosong tidak ditangani |
-| 2 | Kesalahan logika (operator) dan tidak ada tes batas |
-| 3 | Persyaratan tidak diterapkan di kode (tidak ada validasi) |
+| Fault | Akar penyebab | Kategori | Pencegahan |
+|-------|---------------|----------|------------|
+| 1 | Asumsi input tidak dituliskan | Kasus tepi tidak ditangani | Validasi input dan test input kosong |
+| 2 | Operator > seharusnya >= | Kesalahan logika | Boundary value analysis dan code review |
+| 3 | Tidak ada validasi rentang nilai | Persyaratan tidak diterapkan | Validasi terpusat dan test nilai ekstrem |
 
 Kesimpulan: dua dari tiga fault muncul karena kasus tepi (edge case) tidak diuji.
